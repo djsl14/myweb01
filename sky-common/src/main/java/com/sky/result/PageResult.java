@@ -20,3 +20,5 @@ public class PageResult implements Serializable {
     private List records; //当前页数据集合
 
 }
+
+
