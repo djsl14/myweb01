@@ -15,6 +15,7 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
+import com.sky.utils.AliOssUtil;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,6 +37,10 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private AliOssUtil aliOssUtil;
+
     @Autowired
     private DishService dishService;
 
@@ -75,14 +81,23 @@ public class DishServiceImpl implements DishService {
         if(setmealIds!=null&&setmealIds.size()>0){
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
+        //先查出oss图片路径（数据库删完就查不到了）
+        String prefix = "https://" + aliOssUtil.getBucketName() + "." + aliOssUtil.getEndpoint() + "/";
+        List<String> objectNames = new ArrayList<>();
+        ids.forEach(id->{
+            Dish dish = dishMapper.getById(id);
+            String image = dish.getImage();
+            if(image != null && image.startsWith(prefix)){
+                objectNames.add(image.substring(prefix.length()));
+            }
+        });
         //删除菜品数据
-//        for(Long id : ids) {
-//            dishMapper.deleteById(id);
-//            //删除对应口味数据
-//            dishFlavorMapper.deleteByDishId(id);
-//        }
         dishMapper.deleteByIds(ids);
         dishFlavorMapper.deleteByDishIds(ids);
+        //删除oss图片（失败抛异常，事务回滚）
+        objectNames.forEach(objectName->{
+            aliOssUtil.delete(objectName);
+        });
     }
     //根据id来查询菜品与口味
     @Override

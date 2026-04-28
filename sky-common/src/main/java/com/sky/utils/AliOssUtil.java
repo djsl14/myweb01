@@ -65,4 +65,19 @@ public class AliOssUtil {
 
         return stringBuilder.toString();
     }
+
+    /**
+     * 文件删除
+     * @param objectName 文件路径/对象名
+     */
+    public void delete(String objectName) {
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        try {
+            ossClient.deleteObject(bucketName, objectName);
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
+    }
 }
