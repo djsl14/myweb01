@@ -8,7 +8,6 @@
         <foreach collection="flavors" item="item" separator=",">
             (#{item.id}, #{item.name}, #{item.value}, #{item.dishId})
         </foreach>
-         ;
     </insert>
     <delete id="deleteByDishIds">
             delete from dish_flavor where dish_id in

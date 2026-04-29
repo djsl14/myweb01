@@ -4,8 +4,8 @@
 <mapper namespace="com.sky.mapper.DishMapper">
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into dish (name, category_id, price, image, description, status)
-        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status})
+        insert into dish (name, category_id, price, image, description, status, create_user, create_time, update_time , update_user)
+        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createUser}, #{createTime}, #{updateTime}, #{updateUser})
     </insert>
     <update id="update">
         update dish
@@ -44,4 +44,24 @@
         </where>
         order by d.create_time desc
     </select>
+    <select id="list" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="getDishesBySetmealId" resultType="com.sky.entity.Dish">
+        select d.*
+        from dish d
+        join setmeal_dish sd on d.id = sd.dish_id
+        where sd.setmeal_id = #{setmealId}
+    </select>
+
 </mapper>
