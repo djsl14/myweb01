@@ -16,3 +16,11 @@ sky:
     port: 6379
     password: 123456
     database: 10
+  wechat:
+    mchid: 你的商户号
+    mchSerialNo: 你的商户证书序列号
+    privateKeyFilePath: 你的商户私钥文件路径
+    apiV3Key: 你的APIv3密钥
+    weChatPayCertFilePath: 你的微信支付平台证书路径
+    notifyUrl: 你的支付回调通知地址
+    refundNotifyUrl: 你的退款回调通知地址
