@@ -11,6 +11,7 @@ import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
+import com.sky.exception.UserNotLoginException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
@@ -147,6 +148,54 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public PageResult pageQuery(int page, int pageSize, Integer status) {
+        if (page < 1 || pageSize < 1) {
+            throw new OrderBusinessException(MessageConstant.PAGE_PARAMETER_ERROR);
+        }
+
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null) {
+            throw new UserNotLoginException(MessageConstant.USER_NOT_LOGIN);
+        }
+
+        PageHelper.startPage(page, pageSize);
+
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setUserId(userId);
+        ordersPageQueryDTO.setStatus(status);
+
+        Page<Orders> pageResult = orderMapper.pageQuery(ordersPageQueryDTO);
+        List<OrderVO> records = new ArrayList<>();
+
+        for (Orders orders : pageResult) {
+            List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(orders.getId());
+
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            orderVO.setOrderDetailList(orderDetails);
+            records.add(orderVO);
+        }
+
+        return new PageResult(pageResult.getTotal(), records);
+    }
+
+    @Override
+    public OrderVO getByIdWithOrderDetail(Long id) {
+        //根据订单id查询订单信息
+        Orders orders = orderMapper.getById(id);
+        if(orders==null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        //根据订单id查询订单详情信息
+        List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(id);
+        //封装VO返回
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders,orderVO);
+        orderVO.setOrderDetailList(orderDetails);
+        return orderVO;
     }
 
 }

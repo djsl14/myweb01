@@ -10,4 +10,6 @@ public interface OrderDetailMapper {
 
     //批量插入订单详细表
     void insertBatch(List<OrderDetail> orderDetails);
+
+    List<OrderDetail> getByOrderId(Long orderId);
 }
