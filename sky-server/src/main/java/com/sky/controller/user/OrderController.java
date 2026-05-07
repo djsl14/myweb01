@@ -11,10 +11,11 @@ import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController("userOrderController")
 @RequestMapping("/user/order")
 @Api(tags = "用户端订单相关信息")
 @Slf4j
@@ -56,5 +57,23 @@ public class OrderController {
         log.info("订单详细信息查询：id={}", id);
         OrderVO orderVO = orderService.getByIdWithOrderDetail(id);
         return Result.success(orderVO);
+    }
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再次购买")
+    public Result<String> repetition(@PathVariable("id") Long id){
+        log.info("再次购买：id={}", id);
+        orderService.submitOrderAgain(id);
+        return Result.success("再次购买成功");
+    }
+    /**
+     * 用户取消订单
+     *
+     * @return
+     */
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result cancel(@PathVariable("id") Long id) throws Exception {
+        orderService.userCancelById(id);
+        return Result.success();
     }
 }
