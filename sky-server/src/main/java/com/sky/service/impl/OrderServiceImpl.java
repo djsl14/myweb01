@@ -15,6 +15,7 @@ import com.sky.exception.UserNotLoginException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.utils.BaiduMapUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
@@ -57,6 +58,8 @@ public class OrderServiceImpl implements OrderService {
     private SetmealMapper setmealMapper;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private BaiduMapUtil baiduMapUtil;
 
     //用户下单
     @Override
@@ -76,6 +79,19 @@ public class OrderServiceImpl implements OrderService {
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         if (list == null || list.size() == 0) {
             throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+        }
+        // 校验配送距离是否超过5公里
+        try {
+            String fullAddress = addressBook.getProvinceName() + addressBook.getCityName()
+                    + addressBook.getDistrictName() + addressBook.getDetail();
+            int distance = baiduMapUtil.post(fullAddress);
+            if (distance > 5000) {
+                throw new AddressBookBusinessException("超出配送范围，当前距离" + (distance / 1000.0) + "公里");
+            }
+        } catch (AddressBookBusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("配送距离校验失败：" + e.getMessage(), e);
         }
         //向订单表参入一条数据
         Orders orders = new Orders();
