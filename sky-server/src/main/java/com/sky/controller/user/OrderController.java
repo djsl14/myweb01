@@ -76,4 +76,9 @@ public class OrderController {
         orderService.userCancelById(id);
         return Result.success();
     }
+    @GetMapping("/remindeer/{id}")
+    public Result remindeer(@PathVariable("id") Long id){
+        orderService.remindeer(id);
+        return Result.success();
+    }
 }
