@@ -86,12 +86,12 @@ public class OrderServiceImpl implements OrderService {
                     + addressBook.getDistrictName() + addressBook.getDetail();
             int distance = baiduMapUtil.post(fullAddress);
             if (distance > 5000) {
-                throw new AddressBookBusinessException("超出配送范围，当前距离" + (distance / 1000.0) + "公里");
+                throw new OrderBusinessException("超出配送范围，当前距离" + (distance / 1000.0) + "公里");
             }
-        } catch (AddressBookBusinessException e) {
+        } catch (OrderBusinessException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("配送距离校验失败：" + e.getMessage(), e);
+            throw new OrderBusinessException("配送距离校验失败：" + e.getMessage());
         }
         //向订单表参入一条数据
         Orders orders = new Orders();

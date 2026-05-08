@@ -13,8 +13,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class BaiduMapUtil {
-    private static final String GEOCODING_URL = "https://api.map.baidu.com/geocoding/v3/";
-    private static final String DIRECTION_URL = "https://api.map.baidu.com/direction/v2/driving";
     private final BaiduMapProperties baiduMapProperties;
 
     /**
@@ -40,7 +38,7 @@ public class BaiduMapUtil {
         params.put("destination", destination);
         params.put("ak", ak);
         params.put("tactics", "2");
-        String result = HttpClientUtil.doGet(DIRECTION_URL, params);
+        String result = HttpClientUtil.doGet(baiduMapProperties.getDirectionUrl(), params);
         JSONObject json = JSONObject.parseObject(result);
         if (json.getInteger("status") != 0) {
             throw new RuntimeException("查询距离失败：" + json.getString("message"));
@@ -55,7 +53,7 @@ public class BaiduMapUtil {
      * 地址 → "lat,lng" 字符串
      */
     public String getLocation(Map<String, String> param) {
-        String result = HttpClientUtil.doGet(GEOCODING_URL, param);
+        String result = HttpClientUtil.doGet(baiduMapProperties.getGeocodingUrl(), param);
         JSONObject json = JSONObject.parseObject(result);
         if (json.getInteger("status") != 0) {
             throw new RuntimeException("地理编码失败：" + json.getString("message"));
